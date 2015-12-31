@@ -8,13 +8,7 @@ import java.math.BigDecimal;
 import piroshi.util.*;
 
 public class HGA extends GA{
-	double finishscore = 0.0;
-	public boolean finish(){
-		return best(nowscore) <= finishscore;
-	}
 	public void localSearch(){
-		lsmode = true;
-		
 		boolean[] flagi = new boolean[popsize];
 		boolean[][] flagj = new boolean[popsize][obj.length];
 		for(int i=0; i<popsize; i++){
