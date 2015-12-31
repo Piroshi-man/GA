@@ -179,6 +179,7 @@ public class GA{
 			}
 			
 			nextscore = eval(next);
+			count += popsize;
 			renewRecord(nextscore);
 			if(bestscore == 0.0){
 //				export_end();
