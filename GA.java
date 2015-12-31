@@ -120,13 +120,13 @@ public class GA{
 		nowscore = eval(now);
 		count += popsize;
 		renewRecord(nowscore);
-		if(bestscore == 0.0){
-//			export_end();
-			export_result();
-			break;				
-		}
-
+		
 		while(true){
+			if(bestscore == 0.0){
+//				export_end();
+				export_result();
+				break;
+			}
 			// 選択
 			// 最小化問題仕様
 			// 最大値(worst)からの差(worst-score_i)を適合度として，
@@ -184,7 +184,7 @@ public class GA{
 			if(bestscore == 0.0){
 //				export_end();
 				export_result();
-                break;				
+                break;
             }
 			
 			/**********************************************************/
@@ -240,9 +240,11 @@ public class GA{
 		try{
 			File h = new File("result.csv");
 			BufferedWriter bwh = new BufferedWriter(new FileWriter(h,true));
-			bwh.write(count);
+			bwh.write(count + "");
 			bwh.newLine();
 			bwh.close();
+		}catch(IOException e){
+			System.out.print(e);
 		}
 	}
 	
