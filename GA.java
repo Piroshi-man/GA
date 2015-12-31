@@ -84,88 +84,14 @@ public class GA{
 		return false;
 	}
 	
-	public void exportScore(double[] score,String filename){
-		try{
-			File f = new File(filename);
-			BufferedWriter bw = new BufferedWriter(new FileWriter(f,true));
-			bw.write(best(score) + ",");
-			bw.close();
-		}catch(IOException e){
-			System.out.print(e);
-		}
-	}
-	public void exportScore_end(double[] score,String filename){
-		try{
-			File f = new File(filename);
-			BufferedWriter bw = new BufferedWriter(new FileWriter(f,true));
-			bw.write("");
-			bw.newLine();
-			bw.close();
-		}catch(IOException e){
-			System.out.print(e);
-		}
-	}
-	public void exportCount(String filename){
-		try{
-			File f = new File(filename);
-			BufferedWriter bw = new BufferedWriter(new FileWriter(f,true));
-			bw.write(count + ",");
-			bw.close();
-		}catch(IOException e){
-			System.out.print(e);
-		}
-	}
-	public void exportCount_end(String filename){
-		try{
-			File f = new File(filename);
-			BufferedWriter bw = new BufferedWriter(new FileWriter(f,true));
-			bw.write("");
-			bw.newLine();
-			bw.close();
-		}catch(IOException e){
-			System.out.print(e);
-		}
-	}
-	public void exportChange(String filename,String str){
-		try{
-			File f = new File(filename);
-			BufferedWriter bw = new BufferedWriter(new FileWriter(f,true));
-			bw.write(str + ":" + countchange + ",");
-			
-			bw.close();
-		}catch(IOException e){
-			System.out.print(e);
-		}
-	}
-	public void exportChange_end(String filename){
-		try{
-			File f = new File(filename);
-			BufferedWriter bw = new BufferedWriter(new FileWriter(f,true));
-			if(end == false){
-			bw.write("");
-			bw.newLine();
-			bw.close();
-			end = true;
-			}
-		}catch(IOException e){
-			System.out.print(e);
-		}
-	}
-	public void export(double[] score,String str){
-		exportScore(score,"score_"+str+".csv");
-		exportCount("count_"+str+".csv");
-		exportChange("change.csv",str);
-	}
-	public void export_end(double[] score,String str){
-		exportScore_end(score,"score_"+str+".csv");
-		exportCount_end("count_"+str+".csv");
-		exportChange_end("change.csv");
-	}
+
 
 	
 	public int generation = 0;
 	public boolean lsmode = false;
 	public boolean end = false;
+	public double bestscore = Double.MAX_VALUE;
+	
 	
 	public void evolve(){
 		// 初期集団の生成
@@ -176,40 +102,31 @@ public class GA{
 		next = new double[popsize][obj.length];
 		nextscore = new double[popsize];
 
+		// 初期集団生成
+		// loop{
+			// 評価
+			// 終了？ -> 終了
+			// 選択
+			// 交叉
+			// 突然変異
+			// 適応度更新？[評価]
+			// loop{
+				// 微分計算[評価 -> 現在、更新予定値]
+				// 更新
+			// }
+		// }
 		
+		// 評価
+		nowscore = eval(now);
+		count += popsize;
+		renewRecord(nowscore);
+		if(bestscore == 0.0){
+//			export_end();
+			export_result();
+			break;				
+		}
 
 		while(true){
-			// 評価
-			nowscore = eval(now);
-			// P.p(generation + " : ");
-			// printbest(now);
-           if(best(nowscore) == 0.0){
-                // try{
-                    // File f = new File("result.csv");
-                    // BufferedWriter bw = new BufferedWriter(new FileWriter(f,true));
-                    // bw.write(generation + "," + count);
-                    // bw.newLine();
-                    // bw.close();
-                // }catch(IOException e){
-                    // System.out.print(e);
-                // }
-				export_end(nowscore,"ga");
-				if(lsmode == true){
-					export_end(nowscore,"ls");
-				}
-                break;
-				
-            }
-			count += popsize;
-			generation++;
-			// 終了条件
-			// if(finish()){
-				// break;
-			// }
-			// if(generation != 0){
-				
-			// }
-			
 			// 選択
 			// 最小化問題仕様
 			// 最大値(worst)からの差(worst-score_i)を適合度として，
@@ -258,51 +175,76 @@ public class GA{
 					BigDecimal bd_a = new BigDecimal(fixval_a);
 					BigDecimal bd1_a = bd_a.setScale(scale, BigDecimal.ROUND_HALF_UP);
 					next[i][j] = bd1_a.doubleValue();
-					double fixval_b = now[i][j];
-					BigDecimal bd_b = new BigDecimal(fixval_b);
-					BigDecimal bd1_b = bd_b.setScale(scale, BigDecimal.ROUND_HALF_UP);
-					now[i][j] = bd1_b.doubleValue();
 				}
 			}
 			
-			
-			renewRecord(now,next,"ga");
+			nextscore = eval(next);
+			renewRecord(nextscore);
+			if(bestscore == 0.0){
+//				export_end();
+				export_result();
+                break;				
+            }
 			
 			/**********************************************************/
             //                    局所探索
             /**********************************************************/
 			
 			localSearch();
-			
-			renewRecord(now,next,"ls");
 			// next を次の世代の now にする
 			// now を次の世代の next を格納する領域にする
 			swap();
-			// P.pln("" + generation + " " + count + " " + best(nowscore));
 		} // while end
-		
-		// P.pln("best genome: " );
-		// printbestAll(now);
-		
 	}
 	
-	public void renewRecord(double[][] before,double[][] after,String str){
-		double[] beforescore = eval(before);
-		double[] afterscore = eval(after);
-		
-		if(best(beforescore) - best(afterscore) > 0){
-			export(afterscore,str);
-			countchange = 0;
+	public void renewRecord(double[] score){
+		double bestindividual = best(score);
+		if(bestscore - bestindividual > 0){
+			bestscore = bestindividual;
+//			export();
 		}
 	}
-	public void renewRecord_end(double[][] before,double[][] after,String str){
-		double[] beforescore = eval(before);
-		double[] afterscore = eval(after);
-		
-		if(best(beforescore) - best(afterscore) > 0){
-			export(afterscore,str);
+	
+	public void export(){
+		try{
+			File f = new File("score.csv");
+			BufferedWriter bwf = new BufferedWriter(new FileWriter(f,true));
+			bwf.write(bestscore + ",");
+			bwf.close();
+			File g = new File("count.csv");
+			BufferedWriter bwg = new BufferedWriter(new FileWriter(g,true));
+			bwg.write(count + ",");
+			bwg.close();
+		}catch(IOException e){
+			System.out.print(e);
 		}
 	}
+	
+	public void export_end(){
+		try{
+			File f = new File("score.csv");
+			BufferedWriter bwf = new BufferedWriter(new FileWriter(f,true));
+			bwf.newLine();
+			bwf.close();
+			File g = new File("count.csv");
+			BufferedWriter bwg = new BufferedWriter(new FileWriter(g,true));
+			bwg.newLine();
+			bwg.close();
+		}catch(IOException e){
+			System.out.print(e);
+		}
+	}
+	
+	public void export_result(){
+		try{
+			File h = new File("result.csv");
+			BufferedWriter bwh = new BufferedWriter(new FileWriter(h,true));
+			bwh.write(count);
+			bwh.newLine();
+			bwh.close();
+		}
+	}
+	
 	
 	public void localSearch(){
 	}
@@ -310,6 +252,9 @@ public class GA{
 		double[][] tmp = now;
 		now = next;
 		next = tmp;
+		double[] tmpscore = nowscore;
+		nowscore = nextscore;
+		nextscore = tmpscore;
 	}
 	
 	public void copy(double[][] array1,double[][] array2){
@@ -368,19 +313,19 @@ public class GA{
 	}
 
 	public double best(double[] score){
-		double bestscore = score[0];
+		double goodscore = score[0];
 		if(minmax){
 			// minimize
 			for(int i=1; i<score.length; i++)
-				if(score[i] < bestscore)
-					bestscore = score[i];
+				if(score[i] < goodscore)
+					goodscore = score[i];
 		}else{
 			// maximize
 			for(int i=1; i<score.length; i++)
-				if(score[i] > bestscore)
-					bestscore = score[i];
+				if(score[i] > goodscore)
+					goodscore = score[i];
 		}
-		return bestscore;
+		return goodscore;
 	}
 	public double worst(double[] score){
 		minmax = !minmax;
