@@ -61,7 +61,7 @@ public class HGA extends GA{
                         next[i][jj] = tmp2[i][jj];
                     }
                 }
-                if(x == obj.length)break;
+            if(x == obj.length)break;
             }
         }
 	}
