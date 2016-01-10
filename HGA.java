@@ -61,7 +61,9 @@ public class HGA extends GA{
                         next[i][jj] = tmp2[i][jj];
                     }
                 }
-            if(x == obj.length)break;
+				nextscore = eval(next);
+				renewRecord(nextscore);
+                if(x == obj.length)break;
             }
         }
 	}
